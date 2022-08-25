@@ -28,7 +28,7 @@ int main(int inn, const char** ins){
     rand_file = fopen("/dev/random", "rb");
     switch(inn){
         case 1:
-            n = 1; l = 10; break;
+            n = 1; l = 11; break;
         case 2:
             n = 1; sscanf(ins[1], "%d", &l); break;
         case 3:
@@ -38,8 +38,15 @@ int main(int inn, const char** ins){
     }
     strength = log2(pow(63, l)) * rand_strength;
     printf("The strength of the password is about %.0f bits.\n", strength);
-    if(strength < 80)
-        printf("WARNING: The suggested minimal length of password should have a strength of 80 bits.\n");
+    if(strength < 40)
+        printf("WARNING: The suggested minimal length of modern hardware protected password should have a strength at least 40 bits.\n");
+    if(strength < 56)
+        printf("WARNING: The suggested minimal length of unbreakable password for common people should have a strength at least 56 bits.\n");
+    if(strength < 72)
+        printf("WARNING: The suggested minimal length of unbreakable password for TOP 10 WANTED should have a strength at least 72 bits.\n");
+    if(strength < 90)
+        printf("WARNING: The suggested minimal length of no kdf password should have a strength at least 90 bits.\n");
+
     printf("\n");
     while(n--)
         writepass(l);
