@@ -5,7 +5,7 @@
 
 #define MAXL 64
 
-static char charset[64] = "0123456789qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM__";
+static char charset[64] = "0123456789qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM_7";
 
 static unsigned char randbuf[MAXL];
 static char passbuf[MAXL+1];

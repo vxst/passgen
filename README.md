@@ -12,7 +12,7 @@ The normal s2k is 26 bits. We aim a password of 49 bits for good security for en
 
 As the defence should provide another 15 bit of security, 35 bit is enough. So the password length should be at least 6.
 
-We use 37 bits for password. for convinence, reduce it into 6 charactor password yearly.
+We use 37 bits for password. for convinence, reduce it into 6 charactor password yearly. It should be **TRUE RANDOM** password.
 
 Still, **NEVER USE ANYTHING WITHOUT A PASSWORD MANAGER IF IT IS NOT WELL KDFED**. S2K, PBKDF2 or scrypt all can be regard as good kdf solution. For things like a simple MD5, **YOU SHOULD NEED 100 BIT OF ENTROPY, 17 charactors**.
 
