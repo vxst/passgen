@@ -1,5 +1,6 @@
 #include<stdio.h>
 #include<math.h>
+#include<bsd/stdlib.h>
 #include<stdlib.h>
 #include<assert.h>
 
@@ -13,7 +14,6 @@ static FILE* rand_file;
 
 static void writepass(int len){
     assert(len >= 0 && len < MAXL);
-    srandomdev();
     fread(randbuf, sizeof(char), (size_t)len, rand_file);
     for(passbuf[len--] = 0; len >= 0; len--)
         passbuf[len] = charset[(randbuf[len] >> 2)^(len&1?0:arc4random()&63)];
