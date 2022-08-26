@@ -5,22 +5,18 @@ The security is based on the safety of random device(which is good for most syst
 # The required security bits
 
 The Bitcoin hash rate is about 200E, which is 67 bits every second.
+We believe it's practicable to use 128 seconds of total world hash power, which is 74 bits.
+Add with 1 bit as margin, it should be my preferred password security for a plain md5.
 
-The most powerful organization should have $1 Billion of ASIC computer power, about 42000 bitcoins, which is 47 days of mining.
-The 47 days is 4 million seconds or 21bits.
+The normal s2k is 26 bits. We aim a password of 49 bits for good security for encrypt, though it must be combined with either u, h, or both as a defence.
 
-So the maximum possible human archivable password crack can crack about 90 bits of security. The normal PBKDF for SHA can get 19 bits in 50ms and 21 bits in 200 ms.
-The entropy of the required password for the most extreme condition is 70 bits. For normal political conditions, only $1 million of real ASIC-based hash power can be used at most, which means 60 bits, or 56 bits for good KDF.
+As the defence should provide another 15 bit of security, 35 bit is enough. So the password length should be at least 6.
 
-So for the unbreakable password, 56 bits is enough for most cases, unless you are a top 10 target for US, CN or JP, in such cases, password is really not the most serious problem, but 72 bits will provide enough protection even in those cases with a good KDF function.
+We use 37 bits for password. for convinence, reduce it into 6 charactor password yearly.
 
-So for the long-term master password, we suggest 56 bits. For mid-term, secure enclave protected or compound password, we suggest 40 bits. Even an ancient Apple secure enclave can provide 16 bits of protection upon the KDF. The 40 bits are also suitable for most web passwords since I will never use an un-secure web system without a password manager. My password manager will, of course, provide 16 bits more protection over plain KDF.
-
-Still, **NEVER USE ANYTHING WITHOUT A PASSWORD MANAGER IF IT IS NOT WELL KDFED**. S2K, PBKDF2 or scrypt all can be regard as good kdf solution. For things like a simple MD5, **YOU SHOULD NEED 90 BIT OF ENTROPY**.
+Still, **NEVER USE ANYTHING WITHOUT A PASSWORD MANAGER IF IT IS NOT WELL KDFED**. S2K, PBKDF2 or scrypt all can be regard as good kdf solution. For things like a simple MD5, **YOU SHOULD NEED 100 BIT OF ENTROPY, 17 charactors**.
 
 In summary:
 
- * 90 bits for no KDF password
- * 72 bits for Top 10 WANTED personal with a good KDF
- * 56 bits for most people with a good KDF, or for Top 10 WANTED personal using hardware based secure enclave protection
- * 40 bits for most people with a hardware based secure enclave or for a website you are sure that has good protection
+ * 6 charactors true random password for compound header
+ * 17 charactors true random password for non-protected security
