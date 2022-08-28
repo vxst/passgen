@@ -1,52 +1,115 @@
 #include<stdio.h>
 #include<math.h>
-#include<bsd/stdlib.h>
 #include<stdlib.h>
 #include<assert.h>
+#include<stdint.h>
+#include<ctype.h>
+#include<string.h>
+#include<openssl/rand.h>
 
 #define MAXL 64
 
-static char charset[64] = "0123456789qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM_7";
+#define RANDOMPASS 1
+#define RANDOMWORD 2
+
+static const char charset[65] = "0123456789qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM_7";
 
 static unsigned char randbuf[MAXL];
 static char passbuf[MAXL+1];
-static FILE* rand_file;
+static char wordbuf[MAXL*9+1];
+static int mode = RANDOMPASS;
 
 static void writepass(int len){
-    assert(len >= 0 && len < MAXL);
-    fread(randbuf, sizeof(char), (size_t)len, rand_file);
-    for(passbuf[len--] = 0; len >= 0; len--)
-        passbuf[len] = charset[(randbuf[len] >> 2)^(len&1?0:arc4random()&63)];
+    uint64_t u_pos;
+    int i;
+
+    RAND_bytes(randbuf, len);
+    RAND_bytes((unsigned char*)(&u_pos), 8);
+
+    u_pos %= len;
+
+    for(i = 0; i < len; i++)
+        passbuf[i] = charset[randbuf[i] & 63];
+    passbuf[u_pos] = '_';
+    passbuf[len]=0;
+
     printf("%s\n", passbuf);
 }
 
+extern char const _binary_words_txt_start[];
+extern char const _binary_words_txt_end[];
 
-int main(int inn, const char** ins){
-    int n, l = 0;
-    double strength;
-    const double rand_strength = 0.995; /* The randomness of generator, we trust it as percent of entropy of true random */
-    rand_file = fopen("/dev/random", "rb");
-    switch(inn){
-        case 1:
-            n = 1; l = 6; break;
-        case 2:
-            n = 1; sscanf(ins[1], "%d", &l); break;
-        case 3:
-            sscanf(ins[1], "%d", &n); sscanf(ins[2], "%d", &l); break;
-        default:
-            assert(0);
+static char wordlist[2048][16];
+
+static void init_wordlist(){
+    char *i, *begin = (char*)_binary_words_txt_start, *end = (char*)_binary_words_txt_end;
+    int iw, jw;
+    for(iw = jw = 0, i = begin; i != end; i++){
+        if(islower(*i))
+            wordlist[iw][jw++] = *i;
+        else
+            jw = wordlist[iw++][jw] = 0;
     }
-    strength = log2(pow(63, l)) * rand_strength;
-    printf("The strength of the password is about %.0f bits.\n", strength);
-    if(strength < 35)
-        printf("WARNING: The suggested minimal length of modern hardware protected or compound password should have a strength at least 35 bits.\n");
-    if(strength < 100)
-        printf("WARNING: The suggested minimal length of no kdf password should have a strength at least 100 bits.\n");
-
-    printf("\n");
-    while(n--)
-        writepass(l);
-    fclose(rand_file);
-    return 0;
 }
 
+static void writeword(int len){
+    int i;
+    *wordbuf = 0;
+    uint32_t wp;
+    for(i = 0; i < len; i++){
+        RAND_bytes((unsigned char*)(&wp), 4);
+        strcat(wordbuf, (i==0?"":"_"));
+        strcat(wordbuf, wordlist[wp&2047]);
+    }
+    printf("%s\n", wordbuf);
+}
+
+static void writeline(int len){
+    if(mode == RANDOMPASS)
+        writepass(len);
+    if(mode == RANDOMWORD)
+        writeword(len);
+}
+    
+
+int main(int argn, const char** args){
+    int n, l = 0;
+    double strength;
+    if(argn > 1 && strcmp(args[1], "-w")==0){
+        args++;
+        argn--;
+        mode = RANDOMWORD;
+        init_wordlist();
+    }
+    switch(argn){
+        case 1:
+            n = 12;
+            l = mode == RANDOMPASS? 10: 6;
+            break;
+        case 2:
+            n = 12;
+            sscanf(args[1], "%d", &l);
+            break;
+        case 3:
+            sscanf(args[1], "%d", &n);
+            sscanf(args[2], "%d", &l);
+            break;
+        default:
+            printf("Invaild input\n");
+            return 1;
+    }
+    if(l < 1 || l >= MAXL || n < 1 || n >= 1024){
+        printf("Invaild input\n");
+        return 1;
+    }
+    if(mode == RANDOMPASS)
+        strength = log2(pow(63, l-1)) + log2(l);
+    else
+        strength = 11 * l;
+    printf("The strength of the password is about %.0f bits.\n\n", strength);
+
+    while(n--)
+        writeline(l);
+
+    return 0;
+}
